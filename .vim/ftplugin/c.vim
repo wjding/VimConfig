@@ -25,6 +25,11 @@
 
 set statusline=%<%f%h%m%r%=%{strlen(getline(line('.')))}\ %l,%c\ %V\ \ \ \ \ \ \ %P
 
+" For Linux kernel
+set path+=/home/wjding/work/linux/4.19.56/include
+
+cs add /home/wjding/work/linux/4.19.56/cscope.out /home/wjding/work/linux/4.19.56
+
 """""""""""""""""""""""""""""""""
 " For C programs
 "set ai cin sts=4 expandtab showmatch cino=>4 sw=4 formatoptions+=lro tw=78
@@ -39,8 +44,14 @@ set formatoptions+=lro
 set tw=78
 set noexpandtab
 set cpoptions=aABceFs
-set path=.,/usr/include,/usr/include/*,/usr/include/*/*,~/src/linux-3.14.58/include,~/src/linux-3.14.58/include/*
-set tags+=$ROOT/tags,~/work/tags
+set path=.,/usr/include,/usr/include/*,/usr/include/*/*
+"set path+=~/src/linux-3.14.58/include,~/src/linux-3.14.58/include/*
+set tags+=~/work/tags
+
+if exists("$ROOT")
+    set path+=$ROOT/include,$ROOT/include/*
+    set tags+=$ROOT/tags
+endif
 
 "compiler gcc
 
@@ -59,25 +70,28 @@ if has("cscope")
     set cst
     set nocsverb
     if hostname() == "lsslogin1"
-        set csprg=/opt/exp/bin/cscope
+"        set csprg=/opt/exp/bin/cscope
 
         exec "cs add ".$ROOT."/cscope.out ".$ROOT
 
-        let paths = substitute($VPATH, "[^:]*:", "", "")
-        for path in split(paths, ':')
-            let ssppath = path.'/'."ssp/cscope.out"
-            let sdepath = path.'/'."sde/cscope.out"
-            let csppath = path.'/'."csp/cscope.out"
-            exec "cs add ".ssppath." ".path
-            exec "cs add ".sdepath." ".path
-            exec "cs add ".csppath." ".path
-        endfor
+"        let paths = substitute($VPATH, "[^:]*:", "", "")
+"        for path in split(paths, ':')
+"            let ssppath = path.'/'."ssp/cscope.out"
+"            let sdepath = path.'/'."sde/cscope.out"
+"            let csppath = path.'/'."csp/cscope.out"
+"            exec "cs add ".ssppath." ".path
+"            exec "cs add ".sdepath." ".path
+"            exec "cs add ".csppath." ".path
+"        endfor
 
-        exec "cs add /home/cssadm/css_ofc/C214.01/css/cscope.out /home/cssadm/css_ofc/C214.01"
+"        exec "cs add /home/cssadm/css_ofc/C214.01/css/cscope.out /home/cssadm/css_ofc/C214.01"
     endif
     " add any database in current directory
+	if exists("$ROOT")
+        exec "cs add ".$ROOT."/cscope.out ".$ROOT
+	endif
     if filereadable("cscope.out")
-        cs add cscope.out
+        exec "cs add cscope.out " . getcwd()
         " else add database pointed to by environment
     elseif $CSCOPE_DB != ""
         cs add $CSCOPE_DB
