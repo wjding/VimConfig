@@ -28,8 +28,6 @@ set statusline=%<%f%h%m%r%=%{strlen(getline(line('.')))}\ %l,%c\ %V\ \ \ \ \ \ \
 " For Linux kernel
 set path+=/home/wjding/work/linux/4.19.56/include
 
-cs add /home/wjding/work/linux/4.19.56/cscope.out /home/wjding/work/linux/4.19.56
-
 """""""""""""""""""""""""""""""""
 " For C programs
 "set ai cin sts=4 expandtab showmatch cino=>4 sw=4 formatoptions+=lro tw=78
@@ -96,6 +94,7 @@ if has("cscope")
     elseif $CSCOPE_DB != ""
         cs add $CSCOPE_DB
     endif
+
     map g<C-]> :cs find c <C-R>=expand("<cword>")<CR><CR>
     map g<C-a> :cs find t <C-R>=expand("<cword>")<CR><CR>
     map g<C-i> :cs find s <C-R>=expand("<cword>")<CR><CR>
