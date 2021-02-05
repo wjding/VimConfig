@@ -25,9 +25,6 @@
 
 set statusline=%<%f%h%m%r%=%{strlen(getline(line('.')))}\ %l,%c\ %V\ \ \ \ \ \ \ %P
 
-" For Linux kernel
-set path+=/home/wjding/work/linux/4.19.56/include
-
 """""""""""""""""""""""""""""""""
 " For C programs
 "set ai cin sts=4 expandtab showmatch cino=>4 sw=4 formatoptions+=lro tw=78
