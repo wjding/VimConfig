@@ -155,7 +155,7 @@ cnoremap <C-A> <C-B>
 cnoremap <C-B> <Left>
 cnoremap <C-F> <Right>
 
-set expandtab
+"set expandtab
 "set showmatch
 
 "if &term =~ "xterm" || &term =~ "dtterm"
