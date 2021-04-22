@@ -559,10 +559,10 @@ function! CompSearchNextPrev(direction)
 endfunction
 
 " Mappings
-nmap <buffer> <F9> <Plug>FindNextInDiag
-nmap <buffer> <F10> <Plug>FindPrevInDiag
-nmap <buffer> <F11> <Plug>FindNextInTrans
-nmap <buffer> <F12> <Plug>FindPrevInTrans
+"nmap <buffer> <F9> <Plug>FindNextInDiag
+"nmap <buffer> <F10> <Plug>FindPrevInDiag
+"nmap <buffer> <F11> <Plug>FindNextInTrans
+"nmap <buffer> <F12> <Plug>FindPrevInTrans
 nmap <silent> <Plug>FindNextInDiag :call FindNext('n', 'n')<CR>
 nmap <silent> <Plug>FindPrevInDiag :call FindNext('N', 'n')<CR>
 nmap <silent> <Plug>FindNextInTrans :call FindNext('n', 'y')<CR>
