@@ -291,7 +291,7 @@ if &term =~ "dtterm" || &term =~ "^xterm$"
     set t_Sf=[3%dm
     set t_Sb=[4%dm
   endif
-  set t_ut=
+  "set t_ut=
   colorscheme my
 elseif &term =~ "^xterm-256color"
   set t_Co=256
@@ -299,7 +299,7 @@ elseif &term =~ "^xterm-256color"
   set t_AF=[38;5;%p1%dm
   " Disable clear using background color to fix CentOS access Debian 8+
   " systems screen gabling. 
-  set t_ut=
+  "set t_ut=
   colorscheme wjding256
 endif
 
