@@ -293,7 +293,7 @@ if &term =~ "dtterm" || &term =~ "^xterm$"
   endif
   "set t_ut=
   colorscheme my
-elseif &term =~ "^xterm-256color"
+elseif &term =~ "^xterm-256color" || &term =~ "^screen"
   set t_Co=256
   set t_AB=[48;5;%p1%dm
   set t_AF=[38;5;%p1%dm

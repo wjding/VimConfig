@@ -64,7 +64,7 @@ if has("cscope")
     set csto=1
     set cst
     set nocsverb
-    if hostname() == "lsslogin1"
+    if hostname() == "lsslogin1" || hostname() == "lsslogin2"
 "        set csprg=/opt/exp/bin/cscope
 
         exec "cs add ".$ROOT."/cscope.out ".$ROOT
@@ -74,9 +74,13 @@ if has("cscope")
 "            let ssppath = path.'/'."ssp/cscope.out"
 "            let sdepath = path.'/'."sde/cscope.out"
 "            let csppath = path.'/'."csp/cscope.out"
+"            let globpath = path.'/'."glob/cscope.out"
+"            let ospath = path.'/'."os/cscope.out"
 "            exec "cs add ".ssppath." ".path
 "            exec "cs add ".sdepath." ".path
 "            exec "cs add ".csppath." ".path
+"            exec "cs add ".globpath." ".path
+"            exec "cs add ".ospath." ".path
 "        endfor
 
 "        exec "cs add /home/cssadm/css_ofc/C214.01/css/cscope.out /home/cssadm/css_ofc/C214.01"
@@ -98,6 +102,25 @@ if has("cscope")
     map <F2> :!buildcs<CR><CR>:cs reset<CR><CR>
     set nocsverb
 endif
+
+function! FindNextSwitchcase()
+    let cw = expand("<cword>")
+    let [lnum, cnum] = searchpos(cw, "bcn")
+    let search_str = '\%\' . cnum . 'c' . '\(\<case\>\|\<default\>\)'
+    echo search_str
+    call search(search_str, "W")
+    let @/ = search_str
+endfunction
+function! FindPreSwitchcase()
+    let cw = expand("<cword>")
+    let [lnum, cnum] = searchpos(cw, "bcn")
+    call cursor(lnum, cnum - 2 )
+    let search_str = '\%\' . cnum . 'c' . '\(\<case\>\|\<default\>\)'
+    call search(search_str, "bW")
+    let @/ = search_str
+endfunction
+map g* :call FindNextSwitchcase()<CR>
+map g# :call FindPreSwitchcase()<CR>
 
 " Highlight the line length > 80
 hi CodeWidth       ctermbg=235
