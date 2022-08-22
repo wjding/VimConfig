@@ -62,6 +62,7 @@ map <S-F8> :cN<CR>
 "syntax on
 "
 if has("cscope")
+    set nocscopeverbose
     if hostname() == "lsslogin1" || hostname() == "lsslogin2"
         set csprg=/opt/exp/bin/cscope
         set csto=1
@@ -87,6 +88,9 @@ if has("cscope")
         exec "cs add /home/cssadm/css_ofc/C214.01/css/cscope.out /home/cssadm/css_ofc/C214.01"
     endif
     " add any database in current directory
+    if filereadable($ROOT . "/cscope.out")
+        exec "cs add " . $ROOT . "/cscope.out"
+    endif
     if filereadable("cscope.out")
         cs add cscope.out
         " else add database pointed to by environment
