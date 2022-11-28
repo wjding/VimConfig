@@ -301,6 +301,9 @@ elseif &term =~ "^xterm-256color" || &term =~ "^screen"
   " systems screen gabling. 
   "set t_ut=
   colorscheme wjding256
+elseif &term == ""
+  " Gvim
+  colorscheme koehler
 endif
 
 if &diff
