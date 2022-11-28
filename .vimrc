@@ -291,6 +291,9 @@ elseif &term =~ "^xterm-256color" || &term =~ "^screen-256color" || &term =~ "sc
   set t_AB=[48;5;%p1%dm
   set t_AF=[38;5;%p1%dm
   colorscheme wjding256
+elseif &term == ""
+  " Gvim
+  colorscheme koehler
 endif
 
 if &diff
