@@ -117,7 +117,7 @@ if has("unix")
     set <S-F10>=[34
     set <S-F11>=[35
     set <S-F12>=[36
-  elseif &term == "xterm-256color"
+  elseif &term =~ "^xterm-256color" || &term =~ "^screen-256color" || &term =~ "^screen.xterm"
     set <S-F5>=[15;2~
     set <S-F6>=[17;2~
     set <S-F7>=[18;2~
@@ -155,7 +155,7 @@ cnoremap <C-A> <C-B>
 cnoremap <C-B> <Left>
 cnoremap <C-F> <Right>
 
-"set expandtab
+set expandtab
 "set showmatch
 
 "if &term =~ "xterm" || &term =~ "dtterm"
@@ -293,7 +293,7 @@ if &term =~ "dtterm" || &term =~ "^xterm$"
   endif
   "set t_ut=
   colorscheme my
-elseif &term =~ "^xterm-256color" || &term =~ "^screen"
+elseif &term =~ "^xterm-256color" || &term =~ "^screen-256color" || &term =~ "screen.xterm"
   set t_Co=256
   set t_AB=[48;5;%p1%dm
   set t_AF=[38;5;%p1%dm

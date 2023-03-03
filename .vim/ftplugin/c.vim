@@ -1,7 +1,14 @@
-" $Id: c.vim,v 1.8 2008-07-22 05:23:54 wjding Exp $
+" $Id: c.vim,v 1.10 2015-06-25 07:59:14 wjding Exp $
 " Author: Steven Ding
 "
 " $Log: c.vim,v $
+" Revision 1.10  2015-06-25 07:59:14  wjding
+" 1. Updated the maximum line length hilight.
+" 2. Added mappings to search for next or previous "case" in a switch.
+"
+" Revision 1.9  2015-02-15 08:27:54  wjding
+" Updated on lsslogin.
+"
 " Revision 1.8  2008-07-22 05:23:54  wjding
 " Move C code highlight from color file to c.vim
 "
@@ -40,8 +47,7 @@ set tw=78
 set noexpandtab
 set cpoptions=aABceFs
 set path=.,/usr/include,/usr/include/*,/usr/include/*/*
-"set path+=~/src/linux-3.14.58/include,~/src/linux-3.14.58/include/*
-set tags+=~/work/tags
+set tags+=$ROOT/tags,~/work/tags
 
 if exists("$ROOT")
     set path+=$ROOT/include,$ROOT/include/*
@@ -63,9 +69,9 @@ map <S-F8> :cN<CR>
 if has("cscope")
     set csto=1
     set cst
-    set nocsverb
+    set csverb
     if hostname() == "lsslogin1" || hostname() == "lsslogin2"
-"        set csprg=/opt/exp/bin/cscope
+        set csprg=/opt/exp/bin/cscope
 
         exec "cs add ".$ROOT."/cscope.out ".$ROOT
 
@@ -86,11 +92,11 @@ if has("cscope")
 "        exec "cs add /home/cssadm/css_ofc/C214.01/css/cscope.out /home/cssadm/css_ofc/C214.01"
     endif
     " add any database in current directory
-	if exists("$ROOT")
+    if exists("$ROOT")
         exec "cs add ".$ROOT."/cscope.out ".$ROOT
-	endif
+    endif
     if filereadable("cscope.out")
-        exec "cs add cscope.out " . getcwd()
+        cs add cscope.out
         " else add database pointed to by environment
     elseif $CSCOPE_DB != ""
         cs add $CSCOPE_DB
@@ -124,4 +130,4 @@ map g# :call FindPreSwitchcase()<CR>
 
 " Highlight the line length > 80
 hi CodeWidth       ctermbg=235
-mat CodeWidth      /\%80v/
+mat CodeWidth      /\%120v/
