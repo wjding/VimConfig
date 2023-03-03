@@ -117,7 +117,7 @@ if has("unix")
     set <S-F10>=[34
     set <S-F11>=[35
     set <S-F12>=[36
-  elseif &term == "xterm-256color" || &term == "screen-256color"
+  elseif &term =~ "^xterm-256color" || &term =~ "^screen-256color" || &term =~ "^screen.xterm"
     set <S-F5>=[15;2~
     set <S-F6>=[17;2~
     set <S-F7>=[18;2~
@@ -286,7 +286,7 @@ if &term =~ "dtterm" || &term =~ "^xterm$"
     set t_Sb=[4%dm
   endif
   colorscheme my
-elseif &term =~ "^xterm-256color" || &term =~ "^screen-256color"
+elseif &term =~ "^xterm-256color" || &term =~ "^screen-256color" || &term =~ "screen.xterm"
   set t_Co=256
   set t_AB=[48;5;%p1%dm
   set t_AF=[38;5;%p1%dm
