@@ -1,26 +1,7 @@
-" $Id: c.vim,v 1.8 2008-07-22 05:23:54 wjding Exp $
+" $Id: go.vim$
 " Author: Steven Ding
 "
-" $Log: c.vim,v $
-" Revision 1.8  2008-07-22 05:23:54  wjding
-" Move C code highlight from color file to c.vim
-"
-" Revision 1.7  2007-06-24 06:43:48  wjding
-" Added hostname check to load cscope DB.
-" For hostname lsslogin1, added support for multiple VPATH for cscope DBs.
-"
-" Revision 1.6  2007/03/02 05:29:17  wjding
-" add support for PE environment
-"
-" Revision 1.5  2006/09/26 12:20:12  wjding
-" Initial script for lsslogin1, FS5K development. Changed tag file, and added
-" several maps.
-"
-" Revision 1.4  2005/01/05 06:02:10  wjding
-" Add "set noexpandtab".
-"
-" Revision 1.3  2004/12/05 07:57:16  wjding
-" Remove expandtab and softtab settings. Remove "gcc" compiler support.
+" $Log: go.vim,v $
 "
 
 set statusline=%<%f%h%m%r%=%{strlen(getline(line('.')))}\ %l,%c\ %V\ \ \ \ \ \ \ %P
