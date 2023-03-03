@@ -73,8 +73,6 @@ if has("cscope")
     if hostname() == "lsslogin1" || hostname() == "lsslogin2"
         set csprg=/opt/exp/bin/cscope
 
-        exec "cs add ".$ROOT."/cscope.out ".$ROOT
-
 "        let paths = substitute($VPATH, "[^:]*:", "", "")
 "        for path in split(paths, ':')
 "            let ssppath = path.'/'."ssp/cscope.out"
@@ -92,8 +90,8 @@ if has("cscope")
 "        exec "cs add /home/cssadm/css_ofc/C214.01/css/cscope.out /home/cssadm/css_ofc/C214.01"
     endif
     " add any database in current directory
-    if exists("$ROOT")
-        exec "cs add ".$ROOT."/cscope.out ".$ROOT
+    if filereadable($ROOT . "/cscope.out")
+        exec "cs add " . $ROOT . "/cscope.out ".$ROOT
     endif
     if filereadable("cscope.out")
         cs add cscope.out
