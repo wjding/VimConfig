@@ -1,4 +1,4 @@
-" $Id: masterlog.vim,v 1.1.2.14 2015-03-04 15:32:19 wjding Exp $
+" $Id: masterlog.vim,v 1.1.2.6 2008-07-24 10:05:17 wjding Exp $
 " Author: Steven Ding <wjding@alcatel-lucent.com>
 "
 " Usage:
@@ -17,34 +17,6 @@
 "      N   : redo search backward
 "
 " $Log: masterlog.vim,v $
-" Revision 1.1.2.14  2015-03-04 15:32:19  wjding
-" Added FoldNonSUBNUM
-"
-" Revision 1.1.2.13  2009-03-13 04:45:40  wjding
-" Changed StatusLine color
-"
-" Revision 1.1.2.12  2009-03-13 03:14:38  wjding
-" Added change history
-"
-" Revision 1.1.2.11  2009-03-13 02:50:55  wjding
-" Modified the Folded syntax display
-"
-" Revision 1.1.2.10  2009-03-13 02:09:15  wjding
-" Support compact SIP headers.
-"
-" Revision 1.1.2.9  2009-03-12 08:56:01  wjding
-" Format change, delete the commented unused code.
-"
-" Revision 1.1.2.8  2009-03-12 08:54:15  wjding
-" There are 2 fixes in this version:
-" 1. Fix the bug that failed to match the headers when there is no space after
-"    header string, such as "Call-ID:LU....", etc.
-" 2. Fix the bug can't match when several Via: headers are merged to one line.
-"
-" Revision 1.1.2.7  2009-03-12 08:49:53  wjding
-" Fix the bug to include \r or \n in the Call-ID, etc. This caused failure to
-" find the correct message sometimes.
-"
 " Revision 1.1.2.6  2008-07-24 10:05:17  wjding
 " Re-format the code
 "
@@ -143,145 +115,237 @@ endfunction
 "
 function! PrintCallInfo()
   let bline = line(".")
-  let lnum = search('^CSeq:', '')
+  let lnum = search('^CSeq: ', '')
   call cursor(bline, 1)
   call s:debug("CSeq: " . lnum)
   if lnum > 0
-    let cseq=substitute(getline(lnum), '^CSeq: \?\d\+ \(\S\+\)\r', '\1', "")
+    let cseq=substitute(getline(lnum), '^CSeq: \d\+ \(\S\+\)\r', '\1', "")
     let req = cseq
   endif
 
   echo req
 endfunction
 
-" Vim version < 7.00
-"
-" Use buffer variable callidentity to store callid, fromtag and via.
-let b:callidentity=""
+if 0
+  " won't use this part yet.
+  let b:callid=""
+  let b:fromtag=""
+  let b:totag=""
+  let b:topbranch=""
 
-" This function returns a string that contains:
-"   callid:fromtag:viabranches
-" Parameters: testVia - y : check the top Via branch
-"                     - n : ignore the top Via branch
-" Returns:    string
-function! GetCCallInfo(testVia)
-  call s:debug("Current Line: " . line("."))
-  if col(".") == 1 && getline(".")[col(".")-1] == "+"
-    let cMsgLogBegin = line(".")
-  else
-    let cMsgLogBegin = search(s:logbeginstr, 'bW')
-  endif
-  let cMsgBegin = search('^[', 'W')
-  let cMsgLogEnd = search(s:logbeginstr, 'W') - 1
-  let cMsgEnd = search('^.*]$', 'bW')
-  call s:debug("cMsgLogBegin: " . cMsgLogBegin . ", cMsgBegin: " . cMsgBegin . ", cMsgEnd: " . cMsgEnd . ", cMsgLogEnd: ". cMsgLogEnd)
-  " reset cursor at the beginning of message
-  call cursor(cMsgBegin, 1)
-  " get call id
-  let lnum = search('^Call-ID:\|^i:', '')
-  call s:debug("CallID lineno: " . lnum)
-  if lnum == 0 || lnum > cMsgEnd
-    call cursor(cMsgEnd, 1)
-    let rc = ""
-    return rc
-  endif
-
-  let line=getline(lnum)
-  let callid=substitute(line, '^\(Call-ID\|i\): \?\([^ ;\r\n]\+\).*', '\2', "")
-  call s:debug("CallID: " . callid)
-
-  " get from tag
-  call cursor(cMsgBegin, 1)
-  let lnum = search('^From:\|^f:', '')
-  if lnum == 0 || lnum > cMsgEnd
-    call cursor(cMsgEnd, 1)
-    let rc = ""
-    return rc
-  endif
-
-  let line=getline(lnum)
-  let fromtag=substitute(line, '^\(From\|f\): \?[^<]*<[^>]\+>;tag=\([^ ;\r\n]\+\).*', '\2', "")
-  call s:debug("From tag: " . fromtag)
-  " get to tag
-"  call cursor(cMsgBegin, 1)
-"  let lnum = search('^To: ', '')
-"  call s:debug("To: " . lnum)
-"  if lnum == 0
-"    let rc = ""
-"    return rc
-"  endif
-"  let line=getline(lnum)
-"  let totag = substitute(line, '^To: [^<]*<[^>]\+>\(;tag=\([^ ;]\+\)\)\{0,1}.*', '\2', "")
-
-  let rc = callid . ":" . fromtag
-
-  if a:testVia == "y"
-    " Get the Via branches
-    call cursor(cMsgBegin, 1)
-    let lnum = search('^Via:\|^v:', '')
-    if lnum == 0 || lnum > cMsgEnd
-      call cursor(cMsgEnd, 1)
-      return rc
+  " This function returns a list that contains:
+  " [callid, fromtag, totag, viabranches]
+  " callid, fromtag, totag are strings
+  " viabranches is a string list contains the branch values from the top-most
+  " Via to the bottom-most Via headers.
+  function! GetCCallInfo()
+    if col(".") == 1 && getline(".")[col(".")-1] == "+"
+      let cMsgLogBegin = line(".")
+    else
+      let cMsgLogBegin = search(s:logbeginstr, 'bW')
     endif
-    let line=getline(lnum)
-    let topbranch = substitute(line, '^\(Via\|v\):.\{-};branch=\([^ ,;\r\n]\+\).*', '\2', "")
+    let cMsgBegin = search('^[', 'W')
+    let cMsgLogEnd = search(s:logbeginstr, 'W') - 1
+    let cMsgEnd = search('^.*]$', 'bW')
+    call s:debug("cMsgLogBegin: " . cMsgLogBegin . ", cMsgBegin: " . cMsgBegin . ", cMsgEnd: " . cMsgEnd . ", cMsgLogEnd: ". cMsgLogEnd)
+    " reset cursor at the beginning of message
+    call cursor(cMsgBegin, 1)
+    " get call id
+    let lnum = search('^Call-ID: ', 'n', cMsgEnd)
+    call s:debug("CallID: " . lnum)
+    if lnum == 0
+      let rlist = ["", "", "", ""]
+      return rlist
+    endif
+
+    let rlist = matchlist(getline(lnum), '^Call-ID: \(\S\+\)')
+    let callid=rlist[1]
+    call s:debug("CallID: " . callid)
+
+    " get from tag
+    let lnum = search('^From: ', 'n', cMsgEnd)
+    call s:debug("From: " . lnum)
+    if lnum == 0
+      let rlist = ["", "", "", ""]
+      return rlist
+    endif
+
+    let rlist = matchlist(getline(lnum), '^From: [^<]*<[^>]\+>;tag=\(\S\+\)')
+    let fromtag=rlist[1]
+    " get to tag
+    let lnum = search('^To: ', 'n', cMsgEnd)
+    call s:debug("To: " . lnum)
+    if lnum == 0
+      let rlist = ["", "", "", ""]
+      return rlist
+    endif
+    let rlist = matchlist(getline(lnum), '^To: [^<]*<[^>]\+>\(;tag=\(\S\+\)\)\{0,1}')
+    let totag = rlist[2]
+
+    " Get the Via branches
+    let lnum = search('^Via: ', 'n', cMsgEnd)
+    let rlist = matchlist(getline(lnum), '^Via: .*;branch=\([^ ;]\+\)')
+    let topbranch = rlist[1]
     call s:debug("Via branch:")
     call s:debug(topbranch)
-    let rc = rc . ":" . topbranch
-    call s:debug("RC: " . rc)
-  endif
+    " return
+    let rlist = [callid, fromtag, totag, topbranch]
+    return rlist
+  endfunction
 
-  " Reset the cursor
-  call cursor(cMsgBegin, 1)
-  " return
-  return rc
-endfunction
-
-" The function will find the next SIP message within current
-" call/transaction.
-"
-" Parameters: dir     - n (downwards) or N (upwards)
-"             testVia - y (transaction) or n (call)
-" Returns:    none
-"
-function! FindNext(dir, testVia)
-  let bline = line(".")
-  let b:callidentity = GetCCallInfo(a:testVia)
-  if b:callidentity == ""
-    echo "Failed to find messages!"
-    return -1
-  endif
-  call s:debug("b:callidentity: \n" . b:callidentity)
-  let found = 0
-  if a:dir == "n"
-    let flag = 'W'
-  else
-    let flag = 'bW'
-  endif
-  while found != 1
-    let cline = search('^[', flag)
-    if cline == 0
+  " dir=n  search downwards
+  " dir=N  search upwards
+  function! FindNext(dir, testVia)
+    let [b:callid, b:fromtag, b:totag, b:topbranch] = GetCCallInfo()
+    if b:callid == "" && b:fromtag == ""
       echo "Failed to find messages!"
-      call cursor(bline, 1)
-      break
+      return -1
+    endif
+    let found = 0
+    if a:dir == "n"
+      let flag = 'W'
+    else
+      let flag = 'bW'
+    endif
+    while found != 1
+      if !search('^[', flag)
+        echo "Failed to find messages!"
+        break
+      endif
+      let [callid, fromtag, totag, topbranch] = GetCCallInfo()
+      call s:debug(callid .", ". fromtag .", ". totag)
+      if (callid == b:callid && fromtag == b:fromtag && topbranch == b:topbranch)
+        let found = 1
+      endif
+    endwhile
+  endfunction
+else
+  " Vim version < 7.00
+  "
+  " Use buffer variable callidentity to store callid, fromtag and via.
+  let b:callidentity=""
+
+  " This function returns a string that contains:
+  "   callid:fromtag:viabranches
+  " Parameters: testVia - y : check the top Via branch
+  "                     - n : ignore the top Via branch
+  " Returns:    string
+  function! GetCCallInfo(testVia)
+    if col(".") == 1 && getline(".")[col(".")-1] == "+"
+      let cMsgLogBegin = line(".")
+    else
+      let cMsgLogBegin = search(s:logbeginstr, 'bW')
+    endif
+    let cMsgBegin = search('^[', 'W')
+    let cMsgLogEnd = search(s:logbeginstr, 'W') - 1
+    let cMsgEnd = search('^.*]$', 'bW')
+    call s:debug("cMsgLogBegin: " . cMsgLogBegin . ", cMsgBegin: " . cMsgBegin . ", cMsgEnd: " . cMsgEnd . ", cMsgLogEnd: ". cMsgLogEnd)
+    " reset cursor at the beginning of message
+    call cursor(cMsgBegin, 1)
+    " get call id
+    let lnum = search('^Call-ID: ', '')
+    call s:debug("CallID: " . lnum)
+    if lnum == 0 || lnum > cMsgEnd
+      call cursor(cMsgEnd, 1)
+      let rc = ""
+      return rc
     endif
 
-    if IsDesiredLog() != 1
-      continue
+    let line=getline(lnum)
+    let callid=substitute(line, '^Call-ID: \([^ ;]\+\).*', '\1', "")
+    call s:debug("CallID: " . callid)
+
+    " get from tag
+    call cursor(cMsgBegin, 1)
+    let lnum = search('^From: ', '')
+    call s:debug("From: " . lnum)
+    if lnum == 0 || lnum > cMsgEnd
+      call cursor(cMsgEnd, 1)
+      let rc = ""
+      return rc
     endif
 
-    let callidentity = GetCCallInfo(a:testVia)
-    call s:debug("Callidentity: \n" . callidentity)
-    if (callidentity == b:callidentity)
-      let found = 1
-    endif
-    call cursor(cline, 1)
-  endwhile
+    let line=getline(lnum)
+    let fromtag=substitute(line, '^From: [^<]*<[^>]\+>;tag=\([^ ;]\+\).*', '\1', "")
+    " get to tag
+"    call cursor(cMsgBegin, 1)
+"    let lnum = search('^To: ', '')
+"    call s:debug("To: " . lnum)
+"    if lnum == 0
+"      let rc = ""
+"      return rc
+"    endif
+"    let line=getline(lnum)
+"    let totag = substitute(line, '^To: [^<]*<[^>]\+>\(;tag=\([^ ;]\+\)\)\{0,1}.*', '\2', "")
 
-  if found == 1
-    call PrintCallInfo()
-  endif
-endfunction
+    let rc = callid . ":" . fromtag
+
+    if a:testVia == "y"
+      " Get the Via branches
+      call cursor(cMsgBegin, 1)
+      let lnum = search('^Via: ', '')
+      if lnum == 0 || lnum > cMsgEnd
+        call cursor(cMsgEnd, 1)
+        return rc
+      endif
+      let line=getline(lnum)
+      let topbranch = substitute(line, '^Via: .*;branch=\([^ ;]\+\).*', '\1', "")
+      call s:debug("Via branch:")
+      call s:debug(topbranch)
+      let rc = rc . ":" . topbranch
+    endif
+
+    " Reset the cursor
+    call cursor(cMsgBegin, 1)
+    " return
+    return rc
+  endfunction
+
+  " The function will find the next SIP message within current
+  " call/transaction.
+  "
+  " Parameters: dir     - n (downwards) or N (upwards)
+  "             testVia - y (transaction) or n (call)
+  " Returns:    none
+  "
+  function! FindNext(dir, testVia)
+    let bline = line(".")
+    let b:callidentity = GetCCallInfo(a:testVia)
+    if b:callidentity == ""
+      echo "Failed to find messages!"
+      return -1
+    endif
+    let found = 0
+    if a:dir == "n"
+      let flag = 'W'
+    else
+      let flag = 'bW'
+    endif
+    while found != 1
+      let cline = search('^[', flag)
+      if cline == 0
+        echo "Failed to find messages!"
+        call cursor(bline, 1)
+        break
+      endif
+
+      if IsDesiredLog() != 1
+        continue
+      endif
+
+      let callidentity = GetCCallInfo(a:testVia)
+      call s:debug(callidentity)
+      if (callidentity == b:callidentity)
+        let found = 1
+      endif
+      call cursor(cline, 1)
+    endwhile
+
+    if found == 1
+      call PrintCallInfo()
+    endif
+  endfunction
+endif
 
 " The function will fold all other log entries except the specified SIP log.
 "
@@ -559,10 +623,10 @@ function! CompSearchNextPrev(direction)
 endfunction
 
 " Mappings
-"nmap <buffer> <F9> <Plug>FindNextInDiag
-"nmap <buffer> <F10> <Plug>FindPrevInDiag
-"nmap <buffer> <F11> <Plug>FindNextInTrans
-"nmap <buffer> <F12> <Plug>FindPrevInTrans
+nmap <buffer> <F9> <Plug>FindNextInDiag
+nmap <buffer> <F10> <Plug>FindPrevInDiag
+nmap <buffer> <F11> <Plug>FindNextInTrans
+nmap <buffer> <F12> <Plug>FindPrevInTrans
 nmap <silent> <Plug>FindNextInDiag :call FindNext('n', 'n')<CR>
 nmap <silent> <Plug>FindPrevInDiag :call FindNext('N', 'n')<CR>
 nmap <silent> <Plug>FindNextInTrans :call FindNext('n', 'y')<CR>
@@ -588,10 +652,7 @@ nmap <silent> <Plug>CompSearchPrev :call CompSearchNextPrev("N")<CR>
 
 " Colors
 hi Headers term=bold cterm=bold ctermfg=2
-mat Headers /\(^Route:\)\@<=.*\|\(^Contact:\|^m:\)\@<=.*\|\(^Event:\|^o:\)\@<=.*/
-hi SessID term=bold cterm=bold ctermfg=3
-2match SessID /^Session-ID:.*/
-hi Folded ctermbg=4 ctermfg=7
-hi StatusLine term=standout cterm=bold,standout ctermfg=4 ctermbg=6
+mat Headers /\(^Route: \)\@<=.*\|\(^Contact: \)\@<=.*/
+hi Folded ctermbg=6
 
 " vim: sw=2

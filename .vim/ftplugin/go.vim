@@ -1,14 +1,7 @@
-" $Id: c.vim,v 1.10 2015-06-25 07:59:14 wjding Exp $
+" $Id: c.vim,v 1.8 2008-07-22 05:23:54 wjding Exp $
 " Author: Steven Ding
 "
 " $Log: c.vim,v $
-" Revision 1.10  2015-06-25 07:59:14  wjding
-" 1. Updated the maximum line length hilight.
-" 2. Added mappings to search for next or previous "case" in a switch.
-"
-" Revision 1.9  2015-02-15 08:27:54  wjding
-" Updated on lsslogin.
-"
 " Revision 1.8  2008-07-22 05:23:54  wjding
 " Move C code highlight from color file to c.vim
 "
@@ -32,6 +25,11 @@
 
 set statusline=%<%f%h%m%r%=%{strlen(getline(line('.')))}\ %l,%c\ %V\ \ \ \ \ \ \ %P
 
+" For Linux kernel
+set path+=/home/wjding/work/linux/4.19.56/include
+
+cs add /home/wjding/work/linux/4.19.56/cscope.out /home/wjding/work/linux/4.19.56
+
 """""""""""""""""""""""""""""""""
 " For C programs
 "set ai cin sts=4 expandtab showmatch cino=>4 sw=4 formatoptions+=lro tw=78
@@ -47,7 +45,8 @@ set tw=78
 set noexpandtab
 set cpoptions=aABceFs
 set path=.,/usr/include,/usr/include/*,/usr/include/*/*
-set tags+=$ROOT/tags,~/work/tags
+"set path+=~/src/linux-3.14.58/include,~/src/linux-3.14.58/include/*
+set tags+=~/work/tags
 
 if exists("$ROOT")
     set path+=$ROOT/include,$ROOT/include/*
@@ -69,9 +68,9 @@ map <S-F8> :cN<CR>
 if has("cscope")
     set csto=1
     set cst
-    set csverb
-    if hostname() == "lsslogin1" || hostname() == "lsslogin2"
-        set csprg=/opt/exp/bin/cscope
+    set nocsverb
+    if hostname() == "lsslogin1"
+"        set csprg=/opt/exp/bin/cscope
 
         exec "cs add ".$ROOT."/cscope.out ".$ROOT
 
@@ -80,28 +79,23 @@ if has("cscope")
 "            let ssppath = path.'/'."ssp/cscope.out"
 "            let sdepath = path.'/'."sde/cscope.out"
 "            let csppath = path.'/'."csp/cscope.out"
-"            let globpath = path.'/'."glob/cscope.out"
-"            let ospath = path.'/'."os/cscope.out"
 "            exec "cs add ".ssppath." ".path
 "            exec "cs add ".sdepath." ".path
 "            exec "cs add ".csppath." ".path
-"            exec "cs add ".globpath." ".path
-"            exec "cs add ".ospath." ".path
 "        endfor
 
 "        exec "cs add /home/cssadm/css_ofc/C214.01/css/cscope.out /home/cssadm/css_ofc/C214.01"
     endif
     " add any database in current directory
-    if exists("$ROOT")
+	if exists("$ROOT")
         exec "cs add ".$ROOT."/cscope.out ".$ROOT
-    endif
+	endif
     if filereadable("cscope.out")
-        cs add cscope.out
+        exec "cs add cscope.out " . getcwd()
         " else add database pointed to by environment
     elseif $CSCOPE_DB != ""
         cs add $CSCOPE_DB
     endif
-
     map g<C-]> :cs find c <C-R>=expand("<cword>")<CR><CR>
     map g<C-a> :cs find t <C-R>=expand("<cword>")<CR><CR>
     map g<C-i> :cs find s <C-R>=expand("<cword>")<CR><CR>
@@ -109,25 +103,6 @@ if has("cscope")
     set nocsverb
 endif
 
-function! FindNextSwitchcase()
-    let cw = expand("<cword>")
-    let [lnum, cnum] = searchpos(cw, "bcn")
-    let search_str = '\%\' . cnum . 'c' . '\(\<case\>\|\<default\>\)'
-    echo search_str
-    call search(search_str, "W")
-    let @/ = search_str
-endfunction
-function! FindPreSwitchcase()
-    let cw = expand("<cword>")
-    let [lnum, cnum] = searchpos(cw, "bcn")
-    call cursor(lnum, cnum - 2 )
-    let search_str = '\%\' . cnum . 'c' . '\(\<case\>\|\<default\>\)'
-    call search(search_str, "bW")
-    let @/ = search_str
-endfunction
-map g* :call FindNextSwitchcase()<CR>
-map g# :call FindPreSwitchcase()<CR>
-
 " Highlight the line length > 80
 hi CodeWidth       ctermbg=235
-mat CodeWidth      /\%120v/
+mat CodeWidth      /\%80v/

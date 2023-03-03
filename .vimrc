@@ -173,20 +173,26 @@ set expandtab
 if has("autocmd")
   """""""""""""""""""""""""""""""""
   " For C programs, has been moved to $HOME/.vim/ftplugin/c.vim
-  au BufNewFile *.c,*.cpp,*.[hH] 0r ~/work/vim/templates/c.temp
-  au BufNewFile *.c,*.cpp so ~/work/vim/c.vim
+  if filereadable("~/work/vim/templates/c.temp")
+    au BufNewFile *.c,*.cpp,*.[hH] 0r ~/work/vim/templates/c.temp
+    au BufNewFile *.c,*.cpp so ~/work/vim/c.vim
+  endif
 "  au BufNewFile *.[hH] so ~/work/vim/h.vim
   "set cino=>4
 
   """""""""""""""""""""""""""""""""
   " For Korn Shell scripts
-  au BufNewFile *.sh 0r ~/work/vim/templates/sh.temp
-  au BufNewFile *.sh so ~/work/vim/sh.vim
+  if filereadable("~/work/vim/templates/sh.temp")
+    au BufNewFile *.sh 0r ~/work/vim/templates/sh.temp
+    au BufNewFile *.sh so ~/work/vim/sh.vim
+  endif
 
   """""""""""""""""""""""""""""""""
   " For Perl Shell scripts
-  au BufNewFile *.pl 0r ~/work/vim/templates/pl.temp
-  au BufNewFile *.pl so ~/work/vim/sh.vim
+  if filereadable("~/work/vim/templates/pl.temp")
+    au BufNewFile *.pl 0r ~/work/vim/templates/pl.temp
+    au BufNewFile *.pl so ~/work/vim/sh.vim
+  endif
 
   """""""""""""""""""""""""""""""""
   " For Readmes
@@ -285,11 +291,15 @@ if &term =~ "dtterm" || &term =~ "^xterm$"
     set t_Sf=[3%dm
     set t_Sb=[4%dm
   endif
+  "set t_ut=
   colorscheme my
 elseif &term =~ "^xterm-256color" || &term =~ "^screen-256color" || &term =~ "screen.xterm"
   set t_Co=256
   set t_AB=[48;5;%p1%dm
   set t_AF=[38;5;%p1%dm
+  " Disable clear using background color to fix CentOS access Debian 8+
+  " systems screen gabling. 
+  "set t_ut=
   colorscheme wjding256
 elseif &term == ""
   " Gvim

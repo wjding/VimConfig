@@ -11,7 +11,7 @@
 ""Case 1[: <abstract>]
 ""------
 ""<description>
-""R2.1_........
+""R4_........
 ""0
 "
 " $Log: tssrc.vim,v $
@@ -167,6 +167,7 @@ function! Format()
   let group = input("Group: ")
   let phase = input("Phase: ")
   let prefix = input("Title prefix: ")
+  let reqprefix = input("Requirement prefix: ")
 
   let choice = confirm("Set name: ", "&DT\n&FT\n&ST", 2, "Question")
   if choice == 0
@@ -180,6 +181,7 @@ function! Format()
   endif
   call setreg('a', "\n\nBEGIN::")
   exec "silent $put a"
+  exec "g/^\\(" . reqprefix . ".*\\|R-IMPLICIT\\)\\n\\n/normal o0"
   exec "%s/\\(^Case \\)\\(\\d\\+\\)\\(.*\\n\\(.*\\n\\)\\{,2\\}-----.*\\n\\(\\(Case \\)\\@!.*\\n\\)*\\)\\d\\(\\n\\n\\n\\n*BEGIN::\\)/\\1\\2\\3\\2\\7/"
   exec "silent $-2,$d"
 "  let user = "s.ding"
@@ -196,8 +198,10 @@ function! Format()
   goto
   let currentline=search("^BEGIN::", "W")
   while currentline > 0
-    let reqline=search("^\\(R2.1_\\)\\|\\(R-IMPLICIT\\)", "W")
+    let reqline=search("^\\(" . reqprefix . "\\)\\|\\(R-IMPLICIT\\)", "W")
+    echo reqline
     let endline=search("^\\d\\+$", "W")
+    echo endline
     exec "silent " . reqline . "," . endline . " mo " . currentline
     call setreg('a', "aa0000\n")
     exec "silent normal \"aPj"
