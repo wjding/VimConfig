@@ -69,7 +69,7 @@ map <S-F8> :cN<CR>
 if has("cscope")
     set csto=1
     set cst
-    set csverb
+    set nocsverb
     if hostname() == "lsslogin1" || hostname() == "lsslogin2"
         set csprg=/opt/exp/bin/cscope
 
@@ -104,7 +104,6 @@ if has("cscope")
     map g<C-a> :cs find t <C-R>=expand("<cword>")<CR><CR>
     map g<C-i> :cs find s <C-R>=expand("<cword>")<CR><CR>
     map <F2> :!buildcs<CR><CR>:cs reset<CR><CR>
-    set nocsverb
 endif
 
 function! FindNextSwitchcase()
